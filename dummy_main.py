@@ -7,6 +7,7 @@ from dummy_data import (
     dummy_fault_flag,
     dummy_telemetry_packet
 )
+from logger import log_to_csv
 
 def main():
     while True:
@@ -24,6 +25,7 @@ def main():
         print("-" * 30)
 
         packet = dummy_telemetry_packet()
+        log_to_csv(packet)
         print("Telemetry Packet:", packet)
         print("=" * 30)
 
@@ -31,4 +33,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
