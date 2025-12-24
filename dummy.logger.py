@@ -1,12 +1,9 @@
 import csv
 from datetime import datetime
+import os
 
 def log_to_csv(data, filename="telemetry_log.csv"):
-    try:
-        with open(filename, "r"):
-            file_exists = True
-    except FileNotFoundError:
-        file_exists = False
+    file_exists = os.path.isfile(filename)
 
     with open(filename, "a", newline="") as file:
         writer = csv.writer(file)
@@ -14,4 +11,6 @@ def log_to_csv(data, filename="telemetry_log.csv"):
         if not file_exists:
             writer.writerow(["timestamp"] + list(data.keys()))
 
-        writer.writerow([datetime.now().isoformat()] + list(data.values()))
+        writer.writerow(
+            [datetime.now().isoformat()] + list(data.values())
+        )
