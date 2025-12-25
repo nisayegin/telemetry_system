@@ -11,12 +11,19 @@ from dummy_data import (
 )
 from hata_kontrol import sistem_kontrol
 def main():
+   soc = 100.0 
+
+    
     while True:
         speed = dummy_speed()
         battery_temp = dummy_battery_temp()
         motor_rpm = dummy_motor_rpm()
         battery_voltage = dummy_battery_voltage()
         fault = dummy_fault_flag()
+
+        soc = dummy_update_soc(soc)  #soc güncelle
+
+        remaining_energy = calculate_remaining_energy(soc)  #kalan enerji
 
         print("Speed (km/h):", speed)
         print("Battery Temp (C):", battery_temp)
@@ -37,4 +44,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
