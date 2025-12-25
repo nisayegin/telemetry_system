@@ -1,3 +1,5 @@
+from dummy_battery import dummy_update_soc, calculate_remaining_energy
+
 import time
 from dummy_data import (
     dummy_speed,
@@ -35,3 +37,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
