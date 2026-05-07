@@ -1,3 +1,19 @@
+"""
+dummy_logger.py — Teknofest 9.2/f, 9.2/h uyumlu CSV logger
+ 
+Bu dosya, orijinal dummy_logger.py'nin yerine geçer. 5 düzeltme uygulandı:
+ 
+  K1 (9.2/f) : CSV ayraç virgül -> noktalı virgül
+  K2 (9.2/h) : Zaman damgası ISO datetime yerine ms (araç başlangıcından)
+  K3 (9.2/h) : Sütun adları ve sırası şartname formatına uydu
+  K4 (9.2/h) : Enerji birimi kWh -> Wh
+  K5 (9.2/h) : Her başlatmada eşsiz dosya adı (timestamp'lı)
+"""
+
+
+
+
+
 import csv
 import os
 import time
