@@ -1,0 +1,38 @@
+"""
+dummy_battery.py — Batarya doluluk (SOC) ve kalan enerji hesabı
+ 
+Düzeltme:
+  K4 (9.2/h) : Kalan enerji birimi kWh -> Wh
+               Şartname örnek dosya formatında alan adı 'kalan_enerji_Wh' olarak
+               geçtiği için Wh kullanıyoruz. 50 kWh = 50000 Wh.
+"""
+ 
+
+    
+    
+# Sabit kapasite — gerçek araçta BMS'ten okunmalı
+
+BATTERY_CAPACITY_WH = 50000.0    # 50 kWh = 50000 Wh
+ 
+ 
+def dummy_update_soc(soc: float) -> float:
+    """Dummy SOC düşüşü — her döngüde %0.05 azalır."""
+    soc -= 0.05
+    if soc < 0:
+        soc = 0.0
+    return soc
+ 
+ 
+def calculate_remaining_energy_Wh(soc: float) -> float:
+    """SOC'den kalan enerjiyi Watt-saat (Wh) olarak hesaplar."""
+    return BATTERY_CAPACITY_WH * (soc / 100.0)
+ 
+ 
+# --------------------------------------------------------------------
+# Geriye dönük uyum — eski kodda calculate_remaining_energy çağrısı
+# kalan_enerji'yi kWh bekliyordu. Artık kullanma; Wh sürümünü tercih et.
+# --------------------------------------------------------------------
+ 
+def calculate_remaining_energy(soc: float) -> float:
+    """DEPRECATED: kWh döner. calculate_remaining_energy_Wh() kullan."""
+    return calculate_remaining_energy_Wh(soc) / 1000.0
