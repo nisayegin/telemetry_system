@@ -1,0 +1,78 @@
+"""
+dummy_main.py — Telemetri sistemi ana döngüsü
+ 
+Düzeltme:
+  İ1 : Logger artık her döngüde çağrılıyor (önceden hiç çağrılmıyordu).
+       Eşsiz dosya adı make_log_filename() ile bir kez oluşturuluyor.
+  K4 : Enerji artık Wh olarak hesaplanıp pakete giriyor.
+"""
+ 
+
+    
+    
+import time
+ 
+from dummy_battery import dummy_update_soc, calculate_remaining_energy_Wh
+from dummy_data import (
+    dummy_speed,
+    dummy_battery_temp,
+    dummy_motor_rpm,
+    dummy_battery_voltage,
+    dummy_fault_flag,
+)
+from dummy_logger import log_electro, make_log_filename
+from hata_kontrol import sistem_kontrol
+ 
+ 
+def main():
+    soc = 100.0
+ 
+    # K5 — Araç her başlatıldığında EŞSİZ dosya adı
+    log_path = make_log_filename(prefix="telemetry")
+    print(f"[*] Log dosyası: {log_path}")
+ 
+    while True:
+        speed = dummy_speed()
+        battery_temp = dummy_battery_temp()
+        motor_rpm = dummy_motor_rpm()
+        battery_voltage = dummy_battery_voltage()
+        fault = dummy_fault_flag()
+ 
+        # SOC ve kalan enerji
+        soc = dummy_update_soc(soc)
+        remaining_energy_Wh = calculate_remaining_energy_Wh(soc)
+ 
+        # Konsol çıktısı (debug için)
+        print("Speed (km/h):", speed)
+        print("Battery Temp (C):", battery_temp)
+        print("Motor RPM:", motor_rpm)
+        print("Battery Voltage (V):", battery_voltage)
+        print(f"Battery SOC (%): {soc:.2f}")
+        print(f"Remaining Energy (Wh): {remaining_energy_Wh:.0f}")
+        print("-" * 30)
+ 
+        # Sınır kontrolleri (alarm)
+        sistem_kontrol(battery_temp, motor_rpm, battery_voltage)
+        print("-" * 30)
+ 
+        # Telemetri paketi (uygulama içi)
+        packet = {
+            "speed_kmh": speed,
+            "battery_temp_c": battery_temp,
+            "motor_rpm": motor_rpm,
+            "battery_voltage_v": battery_voltage,
+            "battery_soc": round(soc, 2),
+            "battery_energy_Wh": round(remaining_energy_Wh, 0),
+            "fault": fault,
+        }
+        print("Telemetry Packet:", packet)
+ 
+        # İ1 — CSV'ye Teknofest formatında kaydet
+        log_electro(log_path, packet)
+ 
+        print("=" * 30)
+        time.sleep(1)
+ 
+ 
+if __name__ == "__main__":
+    main()
