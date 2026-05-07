@@ -1,0 +1,95 @@
+import csv
+import os
+import time
+from datetime import datetime
+ 
+# --------------------------------------------------------------------
+# Şartname (9.2/h) örnek dosya formatlarından alınan sabit alan adları
+# --------------------------------------------------------------------
+ 
+FIELDS_ELECTRO = [
+    "zaman_ms",
+    "hiz_kmh",
+    "T_bat_C",
+    "V_bat_V",
+    "kalan_enerji_Wh",
+]
+ 
+FIELDS_HYDRO = [
+    "zaman_ms",
+    "hiz_kmh",
+    "T_bat_C",
+    "T_tank_C",
+    "V_bat_V",
+    "kalan_enerji_Wh",
+]
+ 
+# --------------------------------------------------------------------
+# Zaman referansı: modül ilk yüklendiğinde t0 belirlenir
+# --------------------------------------------------------------------
+ 
+_T0 = time.monotonic()
+ 
+ 
+def now_ms() -> int:
+    """Araç çalışmaya başladığı andan bu yana milisaniye (9.2/h)."""
+    return int((time.monotonic() - _T0) * 1000)
+ 
+ 
+# --------------------------------------------------------------------
+# K5 — Her başlatmada eşsiz dosya adı
+# --------------------------------------------------------------------
+ 
+def make_log_filename(prefix: str = "telemetry", outdir: str = "logs") -> str:
+    """logs/telemetry_YYYYMMDD_HHMMSS.csv biçiminde eşsiz dosya adı."""
+    os.makedirs(outdir, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return os.path.join(outdir, f"{prefix}_{stamp}.csv")
+ 
+ 
+# --------------------------------------------------------------------
+# Asıl yazıcı — Elektromobil
+# --------------------------------------------------------------------
+ 
+def log_electro(filename: str, data: dict) -> None:
+    """Bir telemetri satırını şartname formatında CSV'ye ekler.
+ 
+    `data` sözlüğünün şu anahtarları içermesi gerekir:
+        speed_kmh           : float, km/h
+        battery_temp_c      : float, °C
+        battery_voltage_v   : float, V
+        battery_energy_Wh   : float, Wh   (kWh DEĞİL)
+    """
+    new_file = not os.path.isfile(filename)
+    with open(filename, "a", newline="") as f:
+        writer = csv.writer(f, delimiter=";")          # K1: noktalı virgül
+        if new_file:
+            writer.writerow(FIELDS_ELECTRO)             # K3: şartname başlıkları
+        writer.writerow([
+            now_ms(),                                   # K2: ms timestamp
+            int(round(data["speed_kmh"])),
+            int(round(data["battery_temp_c"] * 10)),    # ×10 sabit nokta
+            int(round(data["battery_voltage_v"] * 10)), # ×10 sabit nokta
+            int(round(data["battery_energy_Wh"])),      # K4: Wh
+        ])
+ 
+ 
+# --------------------------------------------------------------------
+# Asıl yazıcı — Hidromobil (varsa kullanılır)
+# --------------------------------------------------------------------
+ 
+def log_hydro(filename: str, data: dict) -> None:
+    new_file = not os.path.isfile(filename)
+    with open(filename, "a", newline="") as f:
+        writer = csv.writer(f, delimiter=";")
+        if new_file:
+            writer.writerow(FIELDS_HYDRO)
+        writer.writerow([
+            now_ms(),
+            int(round(data["speed_kmh"])),
+            int(round(data["battery_temp_c"] * 10)),
+            int(round(data["tank_temp_c"] * 10)),
+            int(round(data["battery_voltage_v"] * 10)),
+            int(round(data["battery_energy_Wh"])),
+        ])
+ 
